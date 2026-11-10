@@ -63,17 +63,15 @@ def main():
     env = dict(os.environ, LLVM_CONFIG=str(llvm / "llvm-config"),
                PS5_CLANG=str(llvm / "clang"), PS5_PAYLOAD_SDK=str(sdk), USE_CCACHE="0")
 
-    archive = args.opengl_archive or DEPS / "ps5-opengl-sdk-1.0.0.tar.gz"
-    fetch("https://github.com/blackbearreloaded/ps5-opengl/releases/download/v1.0.0/ps5-opengl-sdk-1.0.0.tar.gz",
-          archive, GL_HASH)
+    # A mirrored repack may already be extracted; verify its pinned manifest and
+    # every SDK file below before using it.
     gl = DEPS / "ps5-opengl-sdk-1.0.0/sdk"
     if not gl.exists():
+        archive = args.opengl_archive or DEPS / "ps5-opengl-sdk-1.0.0.tar.gz"
+        fetch("https://github.com/blackbearreloaded/ps5-opengl/releases/download/v1.0.0/ps5-opengl-sdk-1.0.0.tar.gz", archive, GL_HASH)
         with tarfile.open(archive) as package:
-            selected = [m for m in package.getmembers() if "/sdk/" in m.name or
-                        m.name.endswith(("LICENSE", "THIRD_PARTY_NOTICES.md"))]
+            selected = [m for m in package.getmembers() if "/sdk/" in m.name or "/LICENSES/" in m.name or m.name.endswith(("LICENSE", "THIRD_PARTY_NOTICES.md"))]
             package.extractall(DEPS, members=selected, filter="data")
-    with tarfile.open(archive) as package:
-        package.extractall(DEPS, members=[m for m in package.getmembers() if "/LICENSES/" in m.name], filter="data")
     verify(gl / "manifest.sha256", GL_MANIFEST)
     for line in (gl / "manifest.sha256").read_text().splitlines():
         checksum, name = line.split(maxsplit=1)
@@ -360,7 +358,7 @@ def main():
                 "network_libraries": {p.name: digest(p) for p in network_libs},
                 "sdk_libraries": {p.name: digest(p) for p in sorted(libs.iterdir()) if p.suffix in (".a", ".so")},
                 "ui_reference": HUI_REV, "embedded_react": ER_REV,
-                "opengl_version": "1.0.0", "opengl_archive_sha256": GL_HASH,
+                "opengl_version": "1.0.0", "opengl_manifest_sha256": GL_MANIFEST,
                 "compiler_builtins_package_sha256": BUILTINS_HASH,
                 "sources": {**{str(p.relative_to(ROOT)): digest(p) for base in (ROOT / "native", ROOT / "runtime", ROOT / "tools", ROOT / "patches")
                                for p in sorted(base.rglob("*")) if p.is_file() and "__pycache__" not in str(p)},

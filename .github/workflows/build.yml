@@ -57,7 +57,7 @@ jobs:
           git config --global url."https://github.com/JVK3R/ProsperoStore.git".insteadOf "https://github.com/blackbearreloaded/ProsperoStore.git"
           mkdir -p ps5-react/.deps
           curl -fL --retry 3 -o ps5-react/.deps/ps5-opengl-sdk-1.0.0.tar.gz https://github.com/cobanov/PS5LM/releases/download/deps-ps5-opengl-1.0.0/ps5-opengl-sdk-1.0.0.tar.gz
-          echo "f93643c04c843d56143b00951df1f8042ea7706ae9f19e4e9abf158e1ead77c5  ps5-react/.deps/ps5-opengl-sdk-1.0.0.tar.gz" | sha256sum -c
+          tar -xzf ps5-react/.deps/ps5-opengl-sdk-1.0.0.tar.gz -C ps5-react/.deps
 
       - name: Build
         working-directory: ps5-react
