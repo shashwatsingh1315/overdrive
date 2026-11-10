@@ -51,6 +51,14 @@ jobs:
           path: ps5-react/.deps
           key: deps-${{ hashFiles('ps5-react/dependencies.lock.json') }}
 
+      - name: Restore unavailable pinned dependencies from mirrors
+        run: |
+          git config --global url."https://github.com/JVK3R/ps5-homebrew-ui.git".insteadOf "https://github.com/blackbearreloaded/ps5-homebrew-ui.git"
+          git config --global url."https://github.com/JVK3R/ProsperoStore.git".insteadOf "https://github.com/blackbearreloaded/ProsperoStore.git"
+          mkdir -p ps5-react/.deps
+          curl -fL --retry 3 -o ps5-react/.deps/ps5-opengl-sdk-1.0.0.tar.gz https://github.com/cobanov/PS5LM/releases/download/deps-ps5-opengl-1.0.0/ps5-opengl-sdk-1.0.0.tar.gz
+          echo "f93643c04c843d56143b00951df1f8042ea7706ae9f19e4e9abf158e1ead77c5  ps5-react/.deps/ps5-opengl-sdk-1.0.0.tar.gz" | sha256sum -c
+
       - name: Build
         working-directory: ps5-react
         run: python3 tools/build_ps5.py --app-dir "$GITHUB_WORKSPACE/app" --llvm /usr/bin
